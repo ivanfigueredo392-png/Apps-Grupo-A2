@@ -323,6 +323,7 @@ body.moving .mc:not(.out){outline:2px dashed var(--accent);outline-offset:-3px}
 .exinfo{font-size:12.5px;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:8px 10px;margin-top:6px}
 .exinfo.bad{color:var(--warn);background:var(--warn-soft)}
 .basetag{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:2px 7px;margin-left:6px;vertical-align:2px}
+.fixedrow{background:color-mix(in srgb,var(--accent-soft) 45%,transparent)}
 .toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;font-size:14px;z-index:30;max-width:calc(100% - 32px)}
 @media (prefers-reduced-motion:no-preference){ .sheet{animation:up .18s ease-out} @keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}} }
 </style>
@@ -406,7 +407,38 @@ function nights(b){return b.checkIn&&b.checkOut?diff(b.checkOut,b.checkIn):0;}
 function totalNights(){return diff(S.trip.end,S.trip.start);}
 
 /* ---------- render ---------- */
+/* ---------- vuelos fijos (boletos Iberia, reserva BALTXG) ---------- */
+var FIX_START="2027-05-04",FIX_END="2027-05-28";
+var FIXED=[
+ {id:"fx-eze",fixed:true,tag:"Aeropuerto",type:"otro",date:"2027-05-04",time:"14:50",title:"Estar en Ezeiza, 3 h antes",place:"Aeropuerto Internacional Ministro Pistarini, Ezeiza",booked:false,needsBooking:false,
+  notes:"Llegar 3 h antes del vuelo. Son 6 personas con 6 valijas, y el check-in y Migraciones llevan tiempo. El mostrador de Iberia cierra 1 h antes de la salida.\nDesde Rosario son unas 4 h por ruta: salir a más tardar a las 10:30.\nHacer el check-in online 24 h antes, desde el lunes 3 a las 17:50.\nLlevar los pasaportes de los 6 a mano."},
+ {id:"fx-ida",fixed:true,tag:"Vuelo",type:"traslado",date:"2027-05-04",time:"17:50",endTime:"10:45 (+1)",title:"Iberia IB 106",from:"Ezeiza",to:"Madrid",mode:"Avión",booked:true,needsBooking:true,
+  notes:"Sale de Ezeiza el martes 4 a las 17:50. Llega a Madrid-Barajas, Terminal 4S, el miércoles 5 a las 10:45 (hora de España).\nDuración: 11 h 55, sin escalas. Airbus A350-900. Clase Económica. Cena y desayuno a bordo.\n1 valija despachada por persona.\nReserva de la agencia: BALTXG (Tower Travel, 11 5217 7400). Reserva de Iberia: NB4JP."},
+ {id:"fx-arr",fixed:true,tag:"Aeropuerto",type:"otro",date:"2027-05-05",time:"10:45",title:"Llegada a Barajas T4S",place:"Aeropuerto Adolfo Suárez Madrid-Barajas, Terminal 4S",booked:false,needsBooking:false,
+  notes:"Contar alrededor de 1 h para Migraciones, el tren interno de la T4S a la T4 y las valijas.\nConviene tener reservado un transfer para 6 con equipaje hasta el alojamiento."},
+ {id:"fx-mad",fixed:true,tag:"Aeropuerto",type:"otro",date:"2027-05-28",time:"05:45",title:"Estar en Barajas T4S, 3 h antes",place:"Aeropuerto Adolfo Suárez Madrid-Barajas, Terminal 4",booked:false,needsBooking:false,
+  notes:"Llegar 3 h antes del vuelo de las 08:45. Primero se entra por la T4 y después hay que tomar el tren interno a la T4S, que lleva unos 10 min.\nEl metro abre a las 06:00 y no alcanza: reservar un taxi o transfer para 6 con valijas la noche anterior. Desde el centro son 25 a 35 min, así que hay que salir a las 05:10.\nHacer el check-in online 24 h antes, desde el jueves 27 a las 08:45.\nConviene dormir la última noche cerca de Atocha o del aeropuerto."},
+ {id:"fx-vuelta",fixed:true,tag:"Vuelo",type:"traslado",date:"2027-05-28",time:"08:45",endTime:"16:25",title:"Iberia IB 105",from:"Madrid",to:"Ezeiza",mode:"Avión",booked:true,needsBooking:true,
+  notes:"Sale de Madrid-Barajas, Terminal 4S, el viernes 28 a las 08:45. Llega a Ezeiza (terminal internacional) a las 16:25 del mismo día.\nDuración: 12 h 40, sin escalas. Airbus A350-900. Clase Económica. Aperitivo y desayuno a bordo.\n1 valija despachada por persona.\nReserva de la agencia: BALTXG (Tower Travel). Reserva de Iberia: NB4JP."}
+];
+function isFixedId(id){return String(id||"").indexOf("fx-")===0;}
+function isHomeFlight(x){if(!x||x.fixed||x.type!=="traslado") return false;var f=norm(x.from),t=norm(x.to),h=function(s){return s.indexOf("ezeiza")>=0||s.indexOf("buenos aires")>=0||s.indexOf("aeroparque")>=0;};return h(f)||h(t);}
+var fxSrc=null;
+function ensureFixed(){
+  if(S.items!==fxSrc){S.items=S.items.filter(function(x){return !x.fixed&&!isFixedId(x.id)&&!isHomeFlight(x);}).concat(FIXED.map(function(f){return Object.assign({},f);}));fxSrc=S.items;}
+  S.trip.start=FIX_START;S.trip.end=FIX_END;
+}
+function userItems(){return S.items.filter(function(x){return !x.fixed;});}
+function fixedSheet(i){
+  openSheet('<h3>'+esc(i.title)+'</h3><div class="hint" style="margin:-6px 0 12px"><span class="state ok">Inamovible</span> · '+WDL[wd(i.date)]+' '+dn(i.date)+' '+mo(i.date)+' · '+esc(i.time)+(i.endTime?' → '+esc(i.endTime):'')+'</div>'+
+    (i.type==="traslado"?'<div class="card" style="margin-bottom:12px"><div class="route" style="font-size:17px">'+esc(i.from)+' <span class="arr">→</span> '+esc(i.to)+'</div></div>':'')+
+    '<div class="note" style="white-space:pre-wrap">'+esc(i.notes)+'</div>'+
+    (i.place?'<p><a href="'+maps(i.place)+'" target="_blank" rel="noopener">Abrir en Google Maps</a></p>':'')+
+    '<div class="hint" style="margin-top:10px">Sale de los boletos emitidos. No se puede mover ni borrar.</div>'+
+    '<div class="actions"><div class="r"><button type="button" class="btn" data-act="close">Cerrar</button></div></div>');
+}
 function render(){
+  ensureFixed();
   var ds=days();
   document.getElementById("tname").textContent=S.trip.name||"Viaje";
   var left=diff(S.trip.start,iso(Date.now()-3*36e5));
@@ -467,10 +499,10 @@ function renderCfg(can){
   return '<div class="sechead"><h2>Configuración</h2></div>'+
   '<form id="fCfg" class="card" style="gap:12px">'+
   '<div class="f"><label for="cName">Nombre del viaje</label><input id="cName" value="'+esc(t.name)+'"'+dis+'></div>'+
-  '<div class="two"><div class="f"><label for="cStart">Salida</label><input id="cStart" type="date" value="'+esc(t.start)+'" required'+dis+'></div>'+
-  '<div class="f"><label for="cEnd">Regreso</label><input id="cEnd" type="date" value="'+esc(t.end)+'" required'+dis+'></div></div>'+
+  '<div class="two"><div class="f"><label for="cStart">Salida</label><input id="cStart" type="date" value="'+esc(t.start)+'" required disabled></div>'+
+  '<div class="f"><label for="cEnd">Regreso</label><input id="cEnd" type="date" value="'+esc(t.end)+'" required disabled></div></div>'+
   '<div class="hint" id="cInfo"></div>'+
-  '<label class="check"><input type="checkbox" id="cShift"'+dis+'> Mover todo el itinerario (bases, traslados y planes) si cambia la fecha de salida</label>'+
+  '<div class="hint">Fechas fijadas por los vuelos: Iberia IB 106 sale de Ezeiza el martes 4 de mayo a las 17:50 e Iberia IB 105 sale de Madrid el viernes 28 a las 08:45.</div><input type="checkbox" id="cShift" hidden>'+
   '<div class="f"><label for="cTrav">Viajeros (uno por línea)</label><textarea id="cTrav" style="min-height:140px"'+dis+'>'+esc((t.travellers||[]).join("\n"))+'</textarea></div>'+
   '<div class="warn" id="cWarn" hidden></div>'+
   '<div class="actions"><div class="r"><button type="button" class="btn" data-act="cfg-reset"'+dis+'>Descartar</button><button type="submit" class="btn primary"'+dis+'>Guardar</button></div></div>'+
@@ -552,7 +584,8 @@ function itemSub(i){
 
 function rowHtml(i,can){
   var mv=S.moving===i.id;
-  return '<div class="rowwrap'+(mv?" movingsel":"")+'"'+(can?' draggable="true" data-drag="'+esc(i.id)+'"':'')+'><button type="button" class="row" data-act="edit-item" data-id="'+esc(i.id)+'"><span class="time'+(i.time?"":" empty")+'">'+(i.time?esc(i.time):"—")+'</span><span><span class="rtitle"><span class="tag">'+esc(TYPES[i.type]||"Otro")+'</span>'+esc(itemTitle(i))+'</span>'+(itemSub(i)?'<br><span class="rsub">'+itemSub(i)+'</span>':'')+'</span>'+(!i.booked&&!i.needsBooking&&i.type!=="traslado"?'<span></span>':stateTag(i.booked))+'</button>'+
+  if(i.fixed) can=false;
+  return '<div class="rowwrap'+(mv?" movingsel":"")+(i.fixed?" fixedrow":"")+'"'+(can?' draggable="true" data-drag="'+esc(i.id)+'"':'')+'><button type="button" class="row" data-act="edit-item" data-id="'+esc(i.id)+'"><span class="time'+(i.time?"":" empty")+'">'+(i.time?esc(i.time):"—")+'</span><span><span class="rtitle"><span class="tag">'+(i.fixed?"Fijo · "+esc(i.tag):esc(TYPES[i.type]||"Otro"))+'</span>'+esc(itemTitle(i))+'</span>'+(itemSub(i)?'<br><span class="rsub">'+itemSub(i)+'</span>':'')+'</span>'+(i.fixed?(i.type==="traslado"?'<span class="state ok">Confirmado</span>':'<span></span>'):(!i.booked&&!i.needsBooking&&i.type!=="traslado"?'<span></span>':stateTag(i.booked)))+'</button>'+
     (can?'<button type="button" class="mvbtn" data-act="move" data-id="'+esc(i.id)+'" aria-label="Mover a otro día" title="Mover a otro día">⇄</button>':'')+'</div>';
 }
 function pendingCount(){
@@ -585,7 +618,7 @@ function renderMonth(can){
     var city=ns.k==="ok"?ns.b.city:ns.k==="fly"?"En vuelo":ns.k==="gap"?"Sin hospedaje":ns.k==="end"?"Regreso":"";
     h+='<div class="'+cls+'" data-act="cell" data-date="'+d+'" data-drop="'+d+'" role="button" tabindex="0" aria-label="'+esc(short(d)+" · "+its.length+" planes")+'"><div class="mband" style="'+band+'"></div>'+
       '<div class="mtop"><span class="mnum">'+dn(d)+(dn(d)===1?" "+mo(d):"")+'</span><span class="mcity">'+esc(city)+'</span></div>'+
-      its.map(function(i){return '<div class="mi'+(i.type==="traslado"?" tras":"")+(S.moving===i.id?" movingsel":"")+(i.needsBooking&&!i.booked?" pend":"")+'"'+(can?' draggable="true" data-drag="'+esc(i.id)+'"':'')+' data-act="chip" data-id="'+esc(i.id)+'" title="'+esc((i.time?i.time+" ":"")+(i.type==="traslado"?(i.from||"")+" → "+(i.to||""):itemTitle(i)))+'"><span class="mt">'+esc(i.time||"")+'</span><span class="mtitle">'+esc(i.type==="traslado"?"→ "+(i.to||i.title):i.type==="excursion"?"↻ "+(i.dest||itemTitle(i)):i.title)+'</span></div>';}).join("")+
+      its.map(function(i){return '<div class="mi'+(i.type==="traslado"?" tras":"")+(S.moving===i.id?" movingsel":"")+(i.needsBooking&&!i.booked?" pend":"")+'"'+(can&&!i.fixed?' draggable="true" data-drag="'+esc(i.id)+'"':'')+' data-act="chip" data-id="'+esc(i.id)+'" title="'+esc((i.time?i.time+" ":"")+(i.type==="traslado"?(i.from||"")+" → "+(i.to||""):itemTitle(i)))+'"><span class="mt">'+esc(i.time||"")+'</span><span class="mtitle">'+esc(i.type==="traslado"?"→ "+(i.to||i.title):i.type==="excursion"?"↻ "+(i.dest||itemTitle(i)):i.title)+'</span></div>';}).join("")+
       '</div>';
   }
   return h+'</div><div class="mlegend"><span><i class="sw" style="background:var(--accent-soft)"></i>Traslado</span><span><i class="sw pendsw"></i>Por reservar</span><span>Tocá un día para ver el detalle'+(can?' · arrastrá un plan para moverlo':'')+'</span></div>';
@@ -602,6 +635,7 @@ function daySheet(d){
     '<div class="actions">'+(can?'<button type="button" class="btn primary" data-act="add-item" data-date="'+d+'">+ Agregar plan</button>':'')+'<div class="r"><button type="button" class="btn ghost" data-act="golist" data-date="'+d+'">Ver en lista</button><button type="button" class="btn" data-act="close">Cerrar</button></div></div>');
 }
 function moveTo(id,d){
+  if(isFixedId(id)){S.moving=null;render();toast("Los vuelos y horarios de aeropuerto son fijos.");return;}
   var i=S.items.find(function(x){return x.id===id;});
   S.moving=null;
   if(!i||!d){render();return;}
@@ -843,6 +877,7 @@ function baseSheet(base){
 
 /* ---------- persistence ---------- */
 function save(col,id,data,quiet){
+  if(col==="items"&&isFixedId(id)) return Promise.resolve(true);
   if(S.mode==="fb") return fbSet(col+"/"+(id||newBaseId()),clean(data));
   if(isLocal()){
     var arr=col==="bases"?S.bases:S.items;
@@ -854,6 +889,7 @@ function save(col,id,data,quiet){
   return ref.set(data).then(function(){return true;},function(e){return dbErr(e,quiet);});
 }
 function remove(col,id){
+  if(col==="items"&&isFixedId(id)) return Promise.resolve(true);
   if(S.mode==="fb") return fbSet(col+"/"+id,null);
   if(isLocal()){var arr=col==="bases"?S.bases:S.items;var k=arr.findIndex(function(x){return x.id===id;});if(k>=0)arr.splice(k,1);persistLocal();render();return Promise.resolve(true);}
   if(!db) return Promise.resolve(false);
@@ -872,7 +908,7 @@ var LKEY="eu27data";
 function isLocal(){return S.mode==="demo"||S.mode==="local";}
 function persistLocal(){
   if(S.mode!=="local") return;
-  try{localStorage.setItem(LKEY,JSON.stringify({trip:S.trip,bases:S.bases,items:S.items,savedAt:new Date().toISOString()}));}catch(e){toast("Este navegador no deja guardar. Exportá los datos para no perderlos.");}
+  try{localStorage.setItem(LKEY,JSON.stringify({trip:S.trip,bases:S.bases,items:userItems(),savedAt:new Date().toISOString()}));}catch(e){toast("Este navegador no deja guardar. Exportá los datos para no perderlos.");}
 }
 function loadData(o){
   S.trip=Object.assign({},TRIP_DEFAULT,o.trip||{});
@@ -1416,7 +1452,7 @@ document.addEventListener("click",function(e){
     closeSheet();opRemove(el.dataset.id);return;
   }
   if(a==="export"){
-    var blob=new Blob([JSON.stringify({trip:S.trip,bases:S.bases,items:S.items,savedAt:new Date().toISOString()},null,2)],{type:"application/json"});
+    var blob=new Blob([JSON.stringify({trip:S.trip,bases:S.bases,items:userItems(),savedAt:new Date().toISOString()},null,2)],{type:"application/json"});
     var u=URL.createObjectURL(blob),ln=document.createElement("a");ln.href=u;ln.download="viaje-europa-2027-"+iso(Date.now())+".json";document.body.appendChild(ln);ln.click();ln.remove();setTimeout(function(){URL.revokeObjectURL(u);},2000);
     toast("Archivo exportado");return;
   }
@@ -1452,7 +1488,7 @@ document.addEventListener("click",function(e){
   if(a==="cfg-reset"){cfgDirty=false;document.getElementById("main").innerHTML="";render();return;}
   var can=S.mode!=="loading"&&!readOnly;
   if(a==="add-item"&&can){itemSheet(null,{date:el.dataset.date||firstFree(),type:el.dataset.type});return;}
-  if(a==="edit-item"){var it=S.items.find(function(x){return x.id===el.dataset.id;});if(it&&can) itemSheet(it);return;}
+  if(a==="edit-item"){var it=S.items.find(function(x){return x.id===el.dataset.id;});if(it&&it.fixed){fixedSheet(it);return;}if(it&&can) itemSheet(it);return;}
   if(a==="add-base"&&can){baseSheet(null);return;}
   if(a==="edit-base"){var bb=S.bases.find(function(x){return x.id===el.dataset.id;});if(bb&&can) baseSheet(bb);return;}
   if(a==="del-item"||a==="del-base"){
