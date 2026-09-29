@@ -481,6 +481,11 @@ function renderCfg(can){
     '<div class="cardfoot"><button type="button" class="btn primary" data-act="export">Exportar datos</button>'+
     '<label class="btn" for="impFile" style="display:inline-flex;align-items:center">Importar datos</label><input type="file" id="impFile" accept=".json,application/json" hidden>'+
     '<button type="button" class="btn danger" data-act="reset-seed">Volver al itinerario original</button></div></div>':'')+
+  '<div class="sechead"><h2>Empezar de cero</h2></div><div class="card" style="gap:10px">'+
+    '<div class="note">Borra todas las bases, excursiones, traslados y planes para cargar el viaje a mano. Se mantienen el nombre, las fechas y los viajeros.'+(S.mode==="fb"?' El borrado es para todos los que usan el enlace.':'')+'</div>'+
+    '<div class="f"><label for="rPass">Contraseña</label><input id="rPass" type="password" autocomplete="off"'+dis+'></div>'+
+    '<div class="exinfo bad" id="rErr" hidden></div>'+
+    '<div class="cardfoot"><button type="button" class="btn danger" data-act="reset-all"'+dis+'>Borrar todo el viaje</button><button type="button" class="btn" data-act="export">Bajar copia antes de borrar</button></div></div>'+
   '<p class="hint" style="margin-top:12px">Los días del calendario, la barra de colores y el conteo de noches se arman con estas fechas. Si acortás el viaje, los planes que queden afuera no se borran: aparecen como aviso acá para que los muevas.</p>';
 }
 function cfgPreview(){
@@ -1414,6 +1419,18 @@ document.addEventListener("click",function(e){
     var blob=new Blob([JSON.stringify({trip:S.trip,bases:S.bases,items:S.items,savedAt:new Date().toISOString()},null,2)],{type:"application/json"});
     var u=URL.createObjectURL(blob),ln=document.createElement("a");ln.href=u;ln.download="viaje-europa-2027-"+iso(Date.now())+".json";document.body.appendChild(ln);ln.click();ln.remove();setTimeout(function(){URL.revokeObjectURL(u);},2000);
     toast("Archivo exportado");return;
+  }
+  if(a==="reset-all"){
+    var rp=document.getElementById("rPass"),re=document.getElementById("rErr");
+    if(!rp||rp.value!=="Europa2027"){if(re){re.hidden=false;re.textContent="Contraseña incorrecta.";}el.classList.remove("armed");el.textContent="Borrar todo el viaje";return;}
+    if(re) re.hidden=true;
+    if(!el.classList.contains("armed")){el.classList.add("armed");el.textContent="¿Seguro? Se borra todo";return;}
+    var done=function(){cfgDirty=false;document.getElementById("main").innerHTML="";render();toast("Viaje vacío. Empezá por Mapa → + Parada.");};
+    if(S.mode==="fb"){Promise.all([fbSet("bases",null),fbSet("items",null)]).then(done);return;}
+    if(isLocal()){S.bases=[];S.items=[];persistLocal();done();return;}
+    var W=S.bases.map(function(b){return {col:"bases",id:b.id,del:true};}).concat(S.items.map(function(x){return {col:"items",id:x.id,del:true};}));
+    runWrites(W,"Viaje vacío. Empezá por Mapa → + Parada.").then(function(){cfgDirty=false;});
+    return;
   }
   if(a==="reset-seed"){
     if(!el.classList.contains("armed")){el.classList.add("armed");el.textContent="¿Seguro? Se pierden tus cambios";return;}
