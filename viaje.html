@@ -998,7 +998,7 @@ var GZ=[
 ["Lisboa",38.7223,-9.1393,["lisbon"]],["Oporto",41.1579,-8.6291,["porto"]],["París",48.8566,2.3522,["paris"]],["Niza",43.7102,7.262,["nice"]],["Marsella",43.2965,5.3698,["marseille"]],
 ["Mónaco",43.7384,7.4246,["monaco","montecarlo"]],["Ginebra",46.2044,6.1432,["geneve","geneva"]],["Zúrich",47.3769,8.5417,["zurich"]],["Múnich",48.1351,11.582,["munich","munchen"]],
 ["Viena",48.2082,16.3738,["wien","vienna"]],["Liubliana",46.0569,14.5058,["ljubljana"]],["Split",43.5081,16.4402],["Dubrovnik",42.6507,18.0944],["Malta",35.8989,14.5146,["la valeta"]],
-["Andorra",42.5063,1.5218,["andorra la vella"]],["Sintra",38.8029,-9.3817],["Algarve",37.1028,-8.6742,["lagos portugal","faro"]],["Gibraltar",36.1408,-5.3536],
+["Andorra",42.5063,1.5218,["andorra la vella"]],["PortAventura",41.0878,1.1572,["port aventura","salou"]],["Gardaland",45.455,10.7137],["Sintra",38.8029,-9.3817],["Algarve",37.1028,-8.6742,["lagos portugal","faro"]],["Gibraltar",36.1408,-5.3536],
 ["Tánger",35.7595,-5.834,["tanger","tangier"]],["Chefchaouen",35.1688,-5.2636],["Fez",34.0181,-5.0078,["fes"]],["Biarritz",43.4832,-1.5586],["Aviñón",43.9493,4.8055,["avignon","avinon"]],
 ["Annecy",45.8992,6.1294],["Chamonix",45.9237,6.8694],["San Marino",43.9424,12.4578],["Lucerna",47.0502,8.3093,["luzern","lucerne"]],["Interlaken",46.6863,7.8632],["Zermatt",46.0207,7.7491],
 ["Lugano",46.0037,8.9511],["Innsbruck",47.2692,11.4041],["Salzburgo",47.8095,13.055,["salzburg"]],["Lago de Bled",46.3625,14.0938,["bled"]],["Piran",45.5283,13.5683],["Carcasona",43.2130,2.3491,["carcassonne"]],["Burdeos",44.8378,-0.5792,["bordeaux"]],["Lyon",45.764,4.8357]
@@ -1164,8 +1164,24 @@ var LABELS=[["ESPAÑA",-3.9,39.2,"c",0],["ITALIA",13.3,42.6,"c",0],
   ["ALEMANIA",10.5,48.9,"o",0],["CROACIA",15.8,45.3,"o",1.6],["ARGELIA",3.2,35.3,"o",0],["TÚNEZ",9.4,34.6,"o",0],
   ["Océano Atlántico",-10.8,44.2,"s",0],["Mar Mediterráneo",5.2,38.3,"s",0],["Mar Tirreno",11.6,39.9,"s",0],["Mar Adriático",15.3,43.3,"s",0],["Mar Balear",2.4,40.3,"s",0],["Mar de Liguria",8.6,43.55,"s",0],["Mar Jónico",18.3,38.3,"s",0],["Golfo de Vizcaya",-4.2,44.8,"s",0]];
 var NEAR={pt:1,fr:1,ad:1,ma:1,x292:1,ch:1,at:1,si:1,mc:1,sm:1,va:1,li:1};
-var CN={pt:"Portugal",fr:"Francia",ad:"Andorra",ma:"Marruecos",gi:"Gibraltar",ch:"Suiza",at:"Austria",si:"Eslovenia",mc:"Mónaco",sm:"San Marino",va:"Vaticano"};
+var CN={es:"España",it:"Italia",pt:"Portugal",fr:"Francia",ad:"Andorra",ma:"Marruecos",gi:"Gibraltar",ch:"Suiza",at:"Austria",si:"Eslovenia",mc:"Mónaco",sm:"San Marino",va:"Vaticano"};
 var SUG=[
+ ["Madrid","es","Capital: Prado, Retiro y Palacio Real"],["Barcelona","es","Gaudí, playa y el Aquarium"],["Valencia","es","Ciudad de las Artes y el Oceanogràfic"],["Sevilla","es","Alcázar, Plaza de España y flamenco"],
+ ["Granada","es","La Alhambra, hay que sacar entradas con meses de anticipación"],["Córdoba","es","La Mezquita y los patios"],["Málaga","es","Playa, Picasso y el centro histórico"],["Toledo","es","Ciudad amurallada, a 35 min en tren de Madrid"],
+ ["Segovia","es","Acueducto romano y el Alcázar de cuento"],["Salamanca","es","Plaza Mayor y la universidad"],["Ávila","es","Murallas medievales enteras"],["Cuenca","es","Casas colgadas sobre el barranco"],
+ ["Bilbao","es","Museo Guggenheim y la ría"],["San Sebastián","es","Playa de la Concha y pintxos"],["Zaragoza","es","Basílica del Pilar"],["Santiago de Compostela","es","Catedral y final del Camino"],
+ ["Palma de Mallorca","es","Isla: calas, catedral y playa"],["Ibiza","es","Playas y la ciudad amurallada"],["Cádiz","es","Ciudad junto al mar y playas largas"],["Ronda","es","Pueblo sobre el Tajo, Puente Nuevo"],
+ ["Nerja","es","Cuevas y balcón al Mediterráneo"],["Girona","es","Casco antiguo, a 40 min de Barcelona"],["Montserrat","es","Monasterio en la montaña, cremallera desde Barcelona"],["Sitges","es","Playa a 40 min de Barcelona"],
+ ["PortAventura","es","Parque de diversiones, a 1 h 15 de Barcelona"],["Tarragona","es","Ruinas romanas junto al mar"],["Alicante","es","Playa y castillo de Santa Bárbara"],["Mérida","es","Teatro romano"],
+ ["Roma","it","Coliseo, Vaticano y fuentes"],["Florencia","it","Duomo, Uffizi y Ponte Vecchio"],["Venecia","it","Canales, góndolas y San Marcos"],["Milán","it","Duomo y La Última Cena"],
+ ["Nápoles","it","La pizza original y el centro histórico"],["Pompeya","it","Ciudad romana bajo el Vesubio"],["Sorrento","it","Base para Capri y la costa"],["Positano","it","Pueblo de colores en la Costa Amalfitana"],
+ ["Amalfi","it","Costa Amalfitana en ferry"],["Capri","it","Isla, Gruta Azul y ferry desde Nápoles"],["Pisa","it","Torre inclinada, a 1 h de Florencia"],["Siena","it","Piazza del Campo, a 1 h 15 de Florencia"],
+ ["Lucca","it","Murallas para recorrer en bici"],["San Gimignano","it","Pueblo de torres en la Toscana"],["Cinque Terre","it","Cinco pueblos de colores sobre el mar"],["Génova","it","El acuario más grande de Italia"],
+ ["Verona","it","El balcón de Julieta y la Arena"],["Gardaland","it","Parque de diversiones en el Lago de Garda"],["Lago de Garda","it","Sirmione y paseos en barco"],["Lago de Como","it","Lago entre montañas, a 1 h de Milán"],
+ ["Bolonia","it","Soportales y la mejor comida"],["Turín","it","Museo Egipcio y los Alpes cerca"],["Rímini","it","Playa en el Adriático"],["Orvieto","it","Pueblo sobre una roca, entre Roma y Florencia"],
+ ["Asís","it","Basílica de San Francisco"],["Perugia","it","Ciudad medieval y chocolate"],["Bari","it","Puerto en el sur y playas"],["Matera","it","Casas excavadas en la roca"],
+ ["Lecce","it","Barroco del sur"],["Palermo","it","Sicilia: mercados y catedral"],["Taormina","it","Sicilia: teatro griego con vista al Etna"],["Catania","it","Sicilia: excursión al volcán Etna"],
+ ["Siracusa","it","Sicilia: Ortigia y ruinas griegas"],["Cagliari","it","Cerdeña: playas turquesa"],["Trieste","it","Café y mar, cerca de Eslovenia"],
  ["Lisboa","pt","Tranvía 28, Belém y Alfama"],["Sintra","pt","Palacios de cuento, a 40 min de Lisboa"],["Oporto","pt","Ribera del Duero y bodegas"],["Algarve","pt","Playas y acantilados en Lagos"],
  ["Andorra","ad","Pirineos y compras, a 3 h de Barcelona"],["Gibraltar","gi","El Peñón y sus monos, cerca de Málaga"],
  ["Tánger","ma","Ferry de 1 h desde Tarifa"],["Chefchaouen","ma","El pueblo azul del Rif"],["Fez","ma","Medina medieval"],
@@ -1292,9 +1308,9 @@ function circuitHtml(can){
   });
   if(il.back) h+='<div class="intlrow">'+iconSvg("plane",14,"var(--ink-3)")+' Vuelta a '+esc(il.back.to)+' · '+short(il.back.date)+'</div>';
   h+='</div>';
-  var sl=sugList().filter(function(x){return x.near;}).sort(function(a,b){return a.near.d-b.near.d;}).slice(0,8);
+  var sl=sugList().filter(function(x){return x.near;}).sort(function(a,b){return a.near.d-b.near.d;}).slice(0,12);
   if(sl.length){
-    h+='<div class="sechead" style="margin-top:16px"><h2>Desvíos posibles</h2></div><div class="hint" style="margin:-4px 0 8px">Lugares de los países limítrofes, ordenados por cercanía a tus paradas.</div><div class="circ">';
+    h+='<div class="sechead" style="margin-top:16px"><h2>Desvíos posibles</h2></div><div class="hint" style="margin:-4px 0 8px">Ciudades de España, Italia y países limítrofes, ordenadas por cercanía a tus paradas.</div><div class="circ">';
     sl.forEach(function(x){h+='<button type="button" class="sugrow" data-act="sug" data-n="'+esc(x.name)+'"><i class="sugdot"></i><span class="sinfo"><b>'+esc(x.name)+' <small>'+esc(CN[x.cc]||"")+'</small></b><span>'+esc(x.note)+'</span></span><span class="sugkm">'+kmTxt(x.near.d)+'<small>de '+esc(x.near.b.city)+'</small></span></button>';});
     h+='</div>';
   }
